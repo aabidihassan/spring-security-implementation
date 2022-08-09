@@ -1,9 +1,5 @@
 package com.labo.budgets.security;
 
-import com.labo.budgets.models.Utilisateur;
-import com.labo.budgets.security.filters.JwtAuthenticationFilter;
-import com.labo.budgets.security.filters.JwtAuthorizationFilter;
-import com.labo.budgets.services.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,9 +10,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import com.labo.budgets.security.filters.JwtAuthenticationFilter;
+import com.labo.budgets.security.filters.JwtAuthorizationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -36,9 +33,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
+        http.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.authorizeRequests().antMatchers("/login/**", "/api/token/**").permitAll();
+        http.authorizeRequests().antMatchers("/login/**", "/api/token/**", "/api/accounts/register").permitAll();
         http.authorizeRequests().anyRequest().authenticated();
+        http.addFilter(new JwtAuthenticationFilter(authenticationManagerBean()));
         http.addFilter(new JwtAuthenticationFilter(authenticationManagerBean()));
         http.addFilterBefore(new JwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
@@ -48,4 +47,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
+    
 }

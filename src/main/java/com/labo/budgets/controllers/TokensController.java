@@ -2,7 +2,8 @@ package com.labo.budgets.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.labo.budgets.security.JwtUtil;
-import com.labo.budgets.services.AccountService;
+import com.labo.budgets.services.UtilisateurService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,22 +17,22 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("api/token")
-public class TokenRefreshController {
+public class TokensController {
 
-    private AccountService accountService;
+    private UtilisateurService utilisateurService;
 
-    public TokenRefreshController(@Autowired AccountService accountService){
-        this.accountService = accountService;
+    @Autowired
+    public TokensController(UtilisateurService utilisateurService){
+        this.utilisateurService = utilisateurService;
     }
 
     @GetMapping(path = "/refreshToken")
-    @PostAuthorize("hasAnyAuthority('ADMIN')")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws Exception{
         String authToken = request.getHeader(JwtUtil.AUTH_HEADER);
         if(authToken!=null && authToken.startsWith(JwtUtil.PREFIX)){
             try {
                 String jwt = authToken.substring(JwtUtil.PREFIX.length());
-                String jwtAccessToken = JwtUtil.createAccessTokenFromRefreshToken(jwt, request.getRequestURL().toString(), accountService);
+                String jwtAccessToken = JwtUtil.createAccessTokenFromRefreshToken(jwt, request.getRequestURL().toString(), utilisateurService);
 
                 Map<String, String> idToken = new HashMap<>();
                 idToken.put("access-token", jwtAccessToken);

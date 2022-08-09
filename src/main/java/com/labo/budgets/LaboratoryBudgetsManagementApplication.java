@@ -2,7 +2,10 @@ package com.labo.budgets;
 
 import com.labo.budgets.models.AppRole;
 import com.labo.budgets.models.Utilisateur;
-import com.labo.budgets.services.AccountService;
+import com.labo.budgets.services.AccountServiceImpl;
+import com.labo.budgets.services.AppRoleService;
+import com.labo.budgets.services.UtilisateurService;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,20 +29,17 @@ public class LaboratoryBudgetsManagementApplication {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    CommandLineRunner start(AccountService accountService){
-        return args -> {
-            accountService.addNewRole(new AppRole("ADMIN"));
-            accountService.addNewRole(new AppRole("USER"));
-            accountService.addNewUser(new Utilisateur("hassan", "hassan", new ArrayList<>()));
-            accountService.addNewUser(new Utilisateur("aabidi", "hassan", new ArrayList<>()));
-            accountService.addNewUser(new Utilisateur("hassanaabidi", "hassan", new ArrayList<>()));
-            accountService.affectRoleToUser("hassan", "ADMIN");
-            accountService.affectRoleToUser("aabidi", "USER");
-            accountService.affectRoleToUser("hassanaabidi", "USER");
-            accountService.affectRoleToUser("hassanaabidi", "ADMIN");
+	@Bean
+  CommandLineRunner start(AccountServiceImpl accountService, AppRoleService appRoleService, UtilisateurService utilisateurService){
+      return args -> {
+          appRoleService.addNewRole(new AppRole("ADMIN"));
+          appRoleService.addNewRole(new AppRole("USER"));
+          utilisateurService.addNewUser(new Utilisateur("hassan", "hassan"));
+          utilisateurService.addNewUser(new Utilisateur("aabidi", "hassan"));
+          accountService.affectRoleToUser("hassan", "ADMIN");
+          accountService.affectRoleToUser("aabidi", "USER");
 
-        };
-    }
+      };
+  }
 
 }
