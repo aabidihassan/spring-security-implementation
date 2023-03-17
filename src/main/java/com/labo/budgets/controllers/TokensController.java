@@ -28,23 +28,7 @@ public class TokensController {
 
     @GetMapping(path = "/refreshToken")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws Exception{
-        String authToken = request.getHeader(JwtUtil.AUTH_HEADER);
-        if(authToken!=null && authToken.startsWith(JwtUtil.PREFIX)){
-            try {
-                String jwt = authToken.substring(JwtUtil.PREFIX.length());
-                String jwtAccessToken = JwtUtil.createAccessTokenFromRefreshToken(jwt, request.getRequestURL().toString(), utilisateurService);
-
-                Map<String, String> idToken = new HashMap<>();
-                idToken.put("access-token", jwtAccessToken);
-                idToken.put("refrsh-token", jwt);
-                response.setContentType("application/json");
-                new ObjectMapper().writeValue(response.getOutputStream(), idToken);
-            }catch (Exception e){
-                throw e;
-            }
-
-        }
-        else throw new RuntimeException("Refresh Token Required");
+        JwtUtil.refreshToken(request, response, utilisateurService);
     }
 
 }

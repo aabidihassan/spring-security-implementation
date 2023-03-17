@@ -4,12 +4,18 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.labo.budgets.models.Utilisateur;
 import com.labo.budgets.services.UtilisateurService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class JwtUtil {
@@ -53,6 +59,26 @@ public class JwtUtil {
                 .withIssuer(url)
                 .withClaim("roles", user.getRoles().stream().map(ga->ga.getLibelle()).collect(Collectors.toList()))
                 .sign(algorithm);
+    }
+
+    public static void refreshToken(HttpServletRequest request, HttpServletResponse response, UtilisateurService utilisateurService) throws Exception{
+        String authToken = request.getHeader(JwtUtil.AUTH_HEADER);
+        if(authToken!=null && authToken.startsWith(JwtUtil.PREFIX)){
+            try {
+                String jwt = authToken.substring(JwtUtil.PREFIX.length());
+                String jwtAccessToken = JwtUtil.createAccessTokenFromRefreshToken(jwt, request.getRequestURL().toString(), utilisateurService);
+
+                Map<String, String> idToken = new HashMap<>();
+                idToken.put("accessToken", jwtAccessToken);
+                idToken.put("refreshToken", jwt);
+                response.setContentType("application/json");
+                new ObjectMapper().writeValue(response.getOutputStream(), idToken);
+            }catch (Exception e){
+                throw e;
+            }
+
+        }
+        else throw new RuntimeException("Refresh Token Required");
     }
 
 
